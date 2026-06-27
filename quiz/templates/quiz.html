@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'webcss/index.css' %}">
+    <title>Quiz - Test Your Knowledge</title>
+</head>
+<body class="quiz-body">
+    <div class="quiz-container">
+        <div class="quiz-card">
+            <!-- Header -->
+            <div class="quiz-header fixed-top">
+                <h1 class="quiz-title">Quiz Challenge</h1>
+                <div class="timer-badge">
+                    <span class="timer-label">Time Remaining:</span>
+                    <span class="timer-value" id="timer">{{time}}</span>
+                </div>
+            </div>
+
+            <!-- Quiz Form -->
+            <form action="{% url 'result' %}" method="post" class="quiz-form" novalidate>
+                {% csrf_token %}
+
+                {% for field in quiz_form %}
+                <div class="question-block">
+                    <!-- Question Number -->
+                    <div class="question-number">Q{{ forloop.counter }}</div>
+                    
+                    <!-- Question Label -->
+                    <label class="question-text" for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    <!-- Options Container -->
+                    <div class="options-container">
+                        {% for radio in field %}
+                        <div class="form-check option-item">
+                            {{ radio.tag }}
+                            <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                {{ radio.choice_label }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Field Errors -->
+                    {% if field.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ field.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <!-- Submit Button -->
+                <div class="submit-container">
+                    <button type="submit" class="btn btn-primary btn-lg btn-submit">
+                        Submit Quiz
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+        const timerElement = document.getElementById("timer");
+        let minutes = {{time}};
+        let seconds = minutes * 60;
+
+        function countdown() {
+            seconds--;
+            let m = Math.floor(seconds / 60);
+            let s = seconds % 60;
+            let timeText = `${m}:${s.toString().padStart(2, '0')}`;
+            timerElement.textContent = timeText;
+            
+            // Add urgency styling when time is low
+            if (seconds <= 60) {
+                timerElement.parentElement.classList.add('timer-urgent');
+            }
+            
+            if (seconds <= 0) {
+                document.forms[0].submit();
+            }
+        }
+
+        setInterval(countdown, 1000);
+    </script>
+</body>
+</html>
+</body>
+</html>
